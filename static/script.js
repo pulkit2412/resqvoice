@@ -9,6 +9,9 @@ function sendSOS() {
       })
     })
     .then(res => res.json())
-    .then(data => alert("🚨 SOS sent!"));
+    .then(data => {
+      alert("🚨 SOS SENT SUCCESSFULLY");
+      console.log(data);
+    });
   });
 }

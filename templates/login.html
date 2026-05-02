@@ -8,47 +8,27 @@
 
 <div class="container">
   <h1>resQvoice</h1>
-  <p>Safety. Voices. Empowerment.</p>
+  <p class="subtitle">Safety. Voices. Empowerment.</p>
 
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
-  <input type="text" id="otp" placeholder="Enter OTP">
 
-  <button onclick="sendOTP()">Send OTP</button>
   <button onclick="register()">Register</button>
   <button onclick="login()">Login</button>
 </div>
 
 <script>
-function sendOTP() {
-  const email = document.getElementById('email').value;
-
-  fetch('/send-otp', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ email })
-  })
-  .then(res => res.json())
-  .then(data => alert(data.message));
-}
-
 function register() {
   fetch('/register', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
       email: email.value,
-      password: password.value,
-      otp: otp.value
+      password: password.value
     })
   })
   .then(res => res.json())
-  .then(data => {
-    alert(data.message);
-    if (data.message === "Registered successfully") {
-      window.location.href = "/dashboard";
-    }
-  });
+  .then(data => alert(data.message));
 }
 
 function login() {
