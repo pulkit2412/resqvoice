@@ -1,0 +1,75 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #1e1e1e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* CARD */
+.container {
+  width: 360px;
+  background: #e3e3e7;
+  border-radius: 30px;
+  padding: 25px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+/* HEADER */
+h1 {
+  text-align: center;
+  color: #1c5c54;
+}
+
+p {
+  text-align: center;
+  color: #444;
+}
+
+/* INPUT */
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border-radius: 25px;
+  border: none;
+  background: #f0f0f0;
+}
+
+/* BUTTON */
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 25px;
+  border: none;
+  background: #1c5c54;
+  color: white;
+  font-size: 16px;
+}
+
+/* SOS */
+.sos-btn {
+  background: #c62828;
+  font-size: 22px;
+  padding: 25px;
+  border-radius: 20px;
+  margin-top: 20px;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.card-box {
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+}
