@@ -37,6 +37,7 @@ def send_email_otp(to_email, otp):
     server.login(sender_email, sender_password)
     server.send_message(msg)
     server.quit()
+    send_email_otp(email, otp)
 
 # -------- ROUTES --------
 @app.route('/')
