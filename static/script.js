@@ -30,7 +30,7 @@ async function login() {
 
     if (data.success) {
         localStorage.setItem("user", email);
-        window.location.href = "index.html";
+        window.location.href = "/dashboard";
     } else {
         alert("Invalid credentials");
     }
