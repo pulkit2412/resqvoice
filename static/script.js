@@ -1,19 +1,19 @@
 const BASE_URL = "https://resqvoice.onrender.com";
 
-// GET USER SAFELY
+// -------- GET USER --------
 function getUser() {
     const user = localStorage.getItem("user");
 
     if (!user) {
-        alert("User not found. Please login again.");
+        alert("Please login first");
         window.location.href = "/";
         return null;
     }
 
-    return user.trim(); // 🔥 FIX: remove spaces/issues
+    return user.trim();
 }
 
-// ADD CONTACT
+// -------- ADD CONTACT --------
 async function addContact() {
     const user = getUser();
     if (!user) return;
@@ -21,11 +21,9 @@ async function addContact() {
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
 
-    console.log("ADDING CONTACT FOR:", user); // DEBUG
-
     const res = await fetch(`${BASE_URL}/add_contact`, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user, name, phone })
     });
 
@@ -35,12 +33,10 @@ async function addContact() {
     loadContacts();
 }
 
-// LOAD CONTACTS
+// -------- LOAD CONTACTS --------
 async function loadContacts() {
     const user = getUser();
     if (!user) return;
-
-    console.log("LOADING CONTACTS FOR:", user); // DEBUG
 
     const res = await fetch(`${BASE_URL}/get_contacts/${user}`);
     const data = await res.json();
@@ -55,17 +51,21 @@ async function loadContacts() {
     });
 }
 
-// SOS
+// -------- SOS (WHATSAPP) --------
 function sendSOS() {
     const user = getUser();
     if (!user) return;
 
-    console.log("SENDING SOS FOR:", user); // DEBUG
+    if (!navigator.geolocation) {
+        alert("Geolocation not supported");
+        return;
+    }
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
+
         const res = await fetch(`${BASE_URL}/sos`, {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 user,
                 latitude: pos.coords.latitude,
@@ -74,6 +74,22 @@ function sendSOS() {
         });
 
         const data = await res.json();
-        alert(`🚨 SOS SENT TO ${data.contacts_notified} CONTACTS`);
+
+        const lat = data.latitude;
+        const lon = data.longitude;
+
+        const message = `🚨 SOS ALERT!
+I need help!
+Location: https://maps.google.com/?q=${lat},${lon}`;
+
+        // 🔥 Open WhatsApp for each contact
+        data.contacts.forEach(contact => {
+            const phone = contact[1].replace("+", ""); // remove +
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+            window.open(url, "_blank");
+        });
+
+        alert("WhatsApp opened for all contacts");
     });
 }
