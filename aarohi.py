@@ -133,56 +133,33 @@ def get_contacts(user):
 def sos():
     data = request.json
 
-    user = data.get("user").strip()  # 🔥 FIX: remove spaces
-    lat = data.get("latitude")
-    lon = data.get("longitude")
+    user = data["user"].strip()
+    lat = data["latitude"]
+    lon = data["longitude"]
 
     conn = get_db()
     c = conn.cursor()
 
-    print("SOS USER:", user)
-    print("FETCHING FROM POSTGRES:", user)# 🔥 DEBUG
-
-    # 🔥 SHOW ALL USERS IN DB
-    c.execute("SELECT user, name FROM contacts")
-    print("DB CONTACTS:", c.fetchall())
-
     # Save SOS
-    c.execute("""
-        INSERT INTO sos_alerts (user, latitude, longitude)
-        VALUES (?, ?, ?)
-    """, (user, lat, lon))
+    c.execute(
+        "INSERT INTO sos_alerts (user_email, latitude, longitude) VALUES (%s, %s, %s)",
+        (user, lat, lon)
+    )
 
-    # 🔥 FETCH CONTACTS
-    c.execute("SELECT name, phone FROM contacts WHERE user=?", (user,))
+    # Get contacts
+    c.execute(
+        "SELECT name, phone FROM contacts WHERE user_email=%s",
+        (user,)
+    )
     contacts = c.fetchall()
-
-    print("MATCHED CONTACTS:", contacts)  # 🔥 DEBUG
 
     conn.commit()
     conn.close()
 
-    message_body = f"""🚨 SOS ALERT!
-User: {user}
-Location: https://maps.google.com/?q={lat},{lon}
-"""
-
-    sent_count = 0
-
-    for contact in contacts:
-        try:
-            client.messages.create(
-                body=message_body,
-                from_=TWILIO_NUMBER,
-                to=contact[1]
-            )
-            sent_count += 1
-        except Exception as e:
-            print("Twilio Error:", e)
-
     return jsonify({
-        "message": "SOS sent!",
-        "contacts_notified": sent_count
+        "contacts": contacts,
+        "latitude": lat,
+        "longitude": lon
     })
 # -------- RUN --------
 if __name__ == "__main__":
