@@ -1,80 +1,56 @@
 const BASE_URL = "https://resqvoice.onrender.com";
-// -------- REGISTER --------
-async function register() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
 
-    const res = await fetch(`${BASE_URL}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-    alert(data.message);
-}
-
-// -------- LOGIN --------
-async function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    const res = await fetch(`${BASE_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-        localStorage.setItem("user", email);
-        window.location.href = "/dashboard";
-    } else {
-        alert("Invalid credentials");
-    }
-}
-
-// -------- ADD CONTACT --------
+// ADD CONTACT
 async function addContact() {
+    const user = localStorage.getItem("user");
     const name = document.getElementById("name").value;
     const phone = document.getElementById("phone").value;
-    const user = localStorage.getItem("user");
 
     const res = await fetch(`${BASE_URL}/add_contact`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ user, name, phone })
     });
 
     const data = await res.json();
     alert(data.message);
+
+    loadContacts(); // refresh
 }
 
-// -------- SOS BUTTON --------
+// LOAD CONTACTS
+async function loadContacts() {
+    const user = localStorage.getItem("user");
+
+    const res = await fetch(`${BASE_URL}/get_contacts/${user}`);
+    const data = await res.json();
+
+    const list = document.getElementById("contacts");
+    list.innerHTML = "";
+
+    data.forEach(c => {
+        const li = document.createElement("li");
+        li.innerText = `${c.name} - ${c.phone}`;
+        list.appendChild(li);
+    });
+}
+
+// SOS
 function sendSOS() {
     const user = localStorage.getItem("user");
 
-    if (!navigator.geolocation) {
-        alert("Geolocation not supported");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(async (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-
+    navigator.geolocation.getCurrentPosition(async (pos) => {
         const res = await fetch(`${BASE_URL}/sos`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
                 user,
-                latitude,
-                longitude
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude
             })
         });
 
         const data = await res.json();
-        alert("🚨 SOS SENT TO " + data.contacts_notified + " CONTACTS");
+        alert(`🚨 SOS SENT TO ${data.contacts_notified} CONTACTS`);
     });
 }
