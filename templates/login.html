@@ -8,7 +8,6 @@
 
 <div class="container">
   <h1>resQvoice</h1>
-  <p class="subtitle">Safety. Voices. Empowerment.</p>
 
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
@@ -20,10 +19,9 @@
 <script>
 const BASE_URL = "https://resqvoice.onrender.com";
 
-// -------- REGISTER --------
 async function register() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = emailInput();
+  const password = passInput();
 
   const res = await fetch(`${BASE_URL}/register`, {
     method: "POST",
@@ -35,10 +33,9 @@ async function register() {
   alert(data.message);
 }
 
-// -------- LOGIN --------
 async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = emailInput();
+  const password = passInput();
 
   const res = await fetch(`${BASE_URL}/login`, {
     method: "POST",
@@ -50,18 +47,15 @@ async function login() {
 
   if (data.success) {
     localStorage.setItem("user", email);
-
-    // ✅ FIXED REDIRECT
     window.location.href = "/dashboard";
   } else {
     alert("Invalid login");
   }
 }
 
-// ✅ Auto-redirect
-if (localStorage.getItem("user")) {
-  window.location.href = "/dashboard";
-}
+function emailInput(){ return document.getElementById("email").value; }
+function passInput(){ return document.getElementById("password").value; }
+
 </script>
 
 </body>
