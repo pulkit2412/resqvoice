@@ -1,10 +1,27 @@
 const BASE_URL = "https://resqvoice.onrender.com";
 
+// GET USER SAFELY
+function getUser() {
+    const user = localStorage.getItem("user");
+
+    if (!user) {
+        alert("User not found. Please login again.");
+        window.location.href = "/";
+        return null;
+    }
+
+    return user.trim(); // 🔥 FIX: remove spaces/issues
+}
+
 // ADD CONTACT
 async function addContact() {
-    const user = localStorage.getItem("user");
-    const name = document.getElementById("name").value;
-    const phone = document.getElementById("phone").value;
+    const user = getUser();
+    if (!user) return;
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+
+    console.log("ADDING CONTACT FOR:", user); // DEBUG
 
     const res = await fetch(`${BASE_URL}/add_contact`, {
         method: "POST",
@@ -15,12 +32,15 @@ async function addContact() {
     const data = await res.json();
     alert(data.message);
 
-    loadContacts(); // refresh
+    loadContacts();
 }
 
 // LOAD CONTACTS
 async function loadContacts() {
-    const user = localStorage.getItem("user");
+    const user = getUser();
+    if (!user) return;
+
+    console.log("LOADING CONTACTS FOR:", user); // DEBUG
 
     const res = await fetch(`${BASE_URL}/get_contacts/${user}`);
     const data = await res.json();
@@ -37,7 +57,10 @@ async function loadContacts() {
 
 // SOS
 function sendSOS() {
-    const user = localStorage.getItem("user");
+    const user = getUser();
+    if (!user) return;
+
+    console.log("SENDING SOS FOR:", user); // DEBUG
 
     navigator.geolocation.getCurrentPosition(async (pos) => {
         const res = await fetch(`${BASE_URL}/sos`, {
