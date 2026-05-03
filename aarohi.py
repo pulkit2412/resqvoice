@@ -1,22 +1,22 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import sqlite3
+import os
 from twilio.rest import Client
 
 app = Flask(__name__)
 CORS(app)
 
-# -------------------- CONFIG --------------------
 DB_NAME = "sos_app.db"
 
-# 🔴 PUT YOUR TWILIO DETAILS HERE
-ACCOUNT_SID = "AC901a837567228b960d44ad36c0a4433d"
-AUTH_TOKEN = "d818ba2774b25b9010f2971d1309e145"
-TWILIO_NUMBER = "+18777804236"
+# 🔐 ENV VARIABLES (SET IN RENDER)
+ACCOUNT_SID = os.environ.get("AC901a837567228b960d44ad36c0a4433d")
+AUTH_TOKEN = os.environ.get("d818ba2774b25b9010f2971d1309e145")
+TWILIO_NUMBER = os.environ.get("+18777804236")
 
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
-# -------------------- DATABASE --------------------
+# ---------- DB ----------
 def get_db():
     return sqlite3.connect(DB_NAME)
 
@@ -55,18 +55,20 @@ def init_db():
 
 init_db()
 
-# -------------------- ROUTES --------------------
-from flask import render_template
+# ---------- ROUTES ----------
 
 @app.route("/")
 def home():
     return render_template("login.html")
 
-# -------- REGISTER --------
+@app.route("/dashboard")
+def dashboard():
+    return render_template("index.html")
+
+# -------- AUTH --------
 @app.route("/register", methods=["POST"])
 def register():
     data = request.json
-
     conn = get_db()
     c = conn.cursor()
 
@@ -75,15 +77,11 @@ def register():
 
     conn.commit()
     conn.close()
-
     return jsonify({"message": "Registered successfully"})
 
-
-# -------- LOGIN --------
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
-
     conn = get_db()
     c = conn.cursor()
 
@@ -95,8 +93,7 @@ def login():
 
     return jsonify({"success": bool(user)})
 
-
-# -------- ADD CONTACT --------
+# -------- CONTACTS --------
 @app.route("/add_contact", methods=["POST"])
 def add_contact():
     data = request.json
@@ -112,10 +109,8 @@ def add_contact():
     conn.commit()
     conn.close()
 
-    return jsonify({"message": "Contact added successfully"})
+    return jsonify({"message": "Contact added"})
 
-
-# -------- GET CONTACTS --------
 @app.route("/get_contacts/<user>")
 def get_contacts(user):
     conn = get_db()
@@ -126,15 +121,12 @@ def get_contacts(user):
     conn.close()
 
     contacts = [{"name": r[0], "phone": r[1]} for r in rows]
-
     return jsonify(contacts)
 
-
-# -------- SOS FUNCTION --------
+# -------- SOS --------
 @app.route("/sos", methods=["POST"])
 def sos():
     data = request.json
-
     user = data.get("user")
     lat = data.get("latitude")
     lon = data.get("longitude")
@@ -142,20 +134,17 @@ def sos():
     conn = get_db()
     c = conn.cursor()
 
-    # Save SOS
     c.execute("""
         INSERT INTO sos_alerts (user, latitude, longitude)
         VALUES (?, ?, ?)
     """, (user, lat, lon))
 
-    # Fetch contacts
     c.execute("SELECT name, phone FROM contacts WHERE user=?", (user,))
     contacts = c.fetchall()
 
     conn.commit()
     conn.close()
 
-    # 🚨 SOS MESSAGE
     message_body = f"""🚨 SOS ALERT!
 User: {user}
 Location: https://maps.google.com/?q={lat},{lon}
@@ -172,40 +161,13 @@ Location: https://maps.google.com/?q={lat},{lon}
             )
             sent_count += 1
         except Exception as e:
-            print(f"❌ Failed for {contact[1]}:", e)
+            print("Error:", e)
 
     return jsonify({
         "message": "SOS sent!",
         "contacts_notified": sent_count
     })
 
-
-# -------- VIEW ALL SOS --------
-@app.route("/get_sos")
-def get_sos():
-    conn = get_db()
-    c = conn.cursor()
-
-    c.execute("SELECT * FROM sos_alerts")
-    rows = c.fetchall()
-    conn.close()
-
-    data = []
-    for row in rows:
-        data.append({
-            "id": row[0],
-            "user": row[1],
-            "latitude": row[2],
-            "longitude": row[3]
-        })
-
-    return jsonify(data)
-
-@app.route("/dashboard")
-def dashboard():
-    return render_template("index.html")
-
-
-# -------------------- RUN --------------------
+# -------- RUN --------
 if __name__ == "__main__":
     app.run(debug=True)
