@@ -127,20 +127,31 @@ def get_contacts(user):
 @app.route("/sos", methods=["POST"])
 def sos():
     data = request.json
-    user = data.get("user")
+
+    user = data.get("user").strip()  # 🔥 FIX: remove spaces
     lat = data.get("latitude")
     lon = data.get("longitude")
 
     conn = get_db()
     c = conn.cursor()
 
+    print("SOS USER:", user)  # 🔥 DEBUG
+
+    # 🔥 SHOW ALL USERS IN DB
+    c.execute("SELECT user, name FROM contacts")
+    print("DB CONTACTS:", c.fetchall())
+
+    # Save SOS
     c.execute("""
         INSERT INTO sos_alerts (user, latitude, longitude)
         VALUES (?, ?, ?)
     """, (user, lat, lon))
 
+    # 🔥 FETCH CONTACTS
     c.execute("SELECT name, phone FROM contacts WHERE user=?", (user,))
     contacts = c.fetchall()
+
+    print("MATCHED CONTACTS:", contacts)  # 🔥 DEBUG
 
     conn.commit()
     conn.close()
@@ -161,13 +172,12 @@ Location: https://maps.google.com/?q={lat},{lon}
             )
             sent_count += 1
         except Exception as e:
-            print("Error:", e)
+            print("Twilio Error:", e)
 
     return jsonify({
         "message": "SOS sent!",
         "contacts_notified": sent_count
     })
-
 # -------- RUN --------
 if __name__ == "__main__":
     app.run(debug=True)
