@@ -7,20 +7,67 @@
 <body>
 
 <div class="container">
-  <h1>Hi, User 👋</h1>
+  <h1>Hi, <span id="userName">User</span> 👋</h1>
   <p class="subtitle">Emergency Dashboard</p>
 
+  <!-- 🚨 SOS BUTTON -->
   <button class="sos-btn" onclick="sendSOS()">🚨 SOS NOW</button>
 
+  <!-- 📞 ADD CONTACT -->
+  <div class="contact-box">
+    <h3>Add Emergency Contact</h3>
+
+    <input type="text" id="name" placeholder="Contact Name">
+    <input type="text" id="phone" placeholder="Phone (+91XXXXXXXXXX)">
+    
+    <button onclick="addContact()">Add Contact</button>
+  </div>
+
+  <!-- 📋 CONTACT LIST -->
+  <div class="contact-list">
+    <h3>Your Contacts</h3>
+    <ul id="contacts"></ul>
+  </div>
+
+  <!-- 📊 EXTRA UI (your original cards) -->
   <div class="grid">
     <div class="card-box">AI Monitor</div>
     <div class="card-box">Status</div>
     <div class="card-box">Journey</div>
     <div class="card-box">Contacts</div>
   </div>
+
 </div>
 
 <script src="/static/script.js"></script>
+
+<script>
+  const BASE_URL = "http://127.0.0.1:5000";
+
+  // 👤 Show logged-in user
+  const user = localStorage.getItem("user");
+  if (user) {
+    document.getElementById("userName").innerText = user;
+    loadContacts();
+  } else {
+    window.location.href = "login.html";
+  }
+
+  // 📥 Load contacts
+  async function loadContacts() {
+    const res = await fetch(`${BASE_URL}/get_contacts/${user}`);
+    const data = await res.json();
+
+    const list = document.getElementById("contacts");
+    list.innerHTML = "";
+
+    data.forEach(c => {
+      const li = document.createElement("li");
+      li.innerText = `${c.name} - ${c.phone}`;
+      list.appendChild(li);
+    });
+  }
+</script>
 
 </body>
 </html>
