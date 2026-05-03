@@ -3,7 +3,7 @@ from flask_cors import CORS
 import sqlite3
 import os
 from twilio.rest import Client
-
+print("DATABASE_URL =", os.environ.get("DATABASE_URL"))
 app = Flask(__name__)
 CORS(app)
 
