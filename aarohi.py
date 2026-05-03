@@ -98,16 +98,20 @@ def login():
 def add_contact():
     data = request.json
 
+    user = data["user"].strip()  # 🔥 FIX
+
     conn = get_db()
     c = conn.cursor()
 
     c.execute("""
         INSERT INTO contacts (user, name, phone)
         VALUES (?, ?, ?)
-    """, (data["user"], data["name"], data["phone"]))
+    """, (user, data["name"], data["phone"]))
 
     conn.commit()
     conn.close()
+
+    print("CONTACT SAVED FOR:", user)  # DEBUG
 
     return jsonify({"message": "Contact added"})
 
