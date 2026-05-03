@@ -201,6 +201,10 @@ def get_sos():
 
     return jsonify(data)
 
+@app.route("/dashboard")
+def dashboard():
+    return render_template("index.html")
+
 
 # -------------------- RUN --------------------
 if __name__ == "__main__":
