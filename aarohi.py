@@ -111,7 +111,8 @@ def add_contact():
     conn.commit()
     conn.close()
 
-    print("CONTACT SAVED FOR:", user)  # DEBUG
+    print("CONTACT SAVED FOR:", user)
+    print("ADDING TO POSTGRES:", user)# DEBUG
 
     return jsonify({"message": "Contact added"})
 
@@ -139,7 +140,8 @@ def sos():
     conn = get_db()
     c = conn.cursor()
 
-    print("SOS USER:", user)  # 🔥 DEBUG
+    print("SOS USER:", user)
+    print("FETCHING FROM POSTGRES:", user)# 🔥 DEBUG
 
     # 🔥 SHOW ALL USERS IN DB
     c.execute("SELECT user, name FROM contacts")
