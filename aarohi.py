@@ -56,10 +56,11 @@ def init_db():
 init_db()
 
 # -------------------- ROUTES --------------------
+from flask import render_template
 
 @app.route("/")
 def home():
-    return "🚀 SOS Backend Running Successfully"
+    return render_template("login.html")
 
 # -------- REGISTER --------
 @app.route("/register", methods=["POST"])
