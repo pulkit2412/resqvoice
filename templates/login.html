@@ -18,7 +18,7 @@
 </div>
 
 <script>
-const BASE_URL = "http://127.0.0.1:5000";
+const BASE_URL = "https://resqvoice.onrender.com";
 
 // -------- REGISTER --------
 async function register() {
@@ -49,19 +49,18 @@ async function login() {
   const data = await res.json();
 
   if (data.success) {
-    // ✅ Save user
     localStorage.setItem("user", email);
 
-    // ✅ Redirect to dashboard
-    window.location.href = "/templates/index.html";
+    // ✅ FIXED REDIRECT
+    window.location.href = "/dashboard";
   } else {
     alert("Invalid login");
   }
 }
 
-// ✅ Auto-redirect if already logged in
+// ✅ Auto-redirect
 if (localStorage.getItem("user")) {
-  window.location.href = "/templates/index.html";
+  window.location.href = "/dashboard";
 }
 </script>
 
