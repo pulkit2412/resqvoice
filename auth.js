@@ -1,30 +1,42 @@
-function register() {
-  fetch('/register', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      email: document.getElementById('email').value,
-      password: document.getElementById('password').value,
-      otp: document.getElementById('otp').value
-    })
-  })
-  .then(res => res.json())
-  .then(data => alert(data.message));
-}
-function login() {
+// -------- REGISTER --------
+async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch("/register", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email, password })
+  });
 
-  if (user && user.email === email && user.password === password) {
-    alert("Login successful!");
-    window.location.href = "index.html";
+  const data = await res.json();
+  alert(data.message);
+}
+
+
+// -------- LOGIN --------
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    localStorage.setItem("user", email);
+    window.location.href = "/dashboard";
   } else {
     alert("Invalid credentials");
   }
 }
 
+
+// -------- SKIP --------
 function skip() {
-  window.location.href = "index.html";
+  window.location.href = "/dashboard";
 }
