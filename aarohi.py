@@ -1,22 +1,13 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import sqlite3
-import os
-from twilio.rest import Client
-print("DATABASE_URL =", os.environ.get("DATABASE_URL"))
+
 app = Flask(__name__)
 CORS(app)
 
 DB_NAME = "sos_app.db"
 
-# 🔐 ENV VARIABLES (SET IN RENDER)
-ACCOUNT_SID = os.environ.get("AC901a837567228b960d44ad36c0a4433d")
-AUTH_TOKEN = os.environ.get("d818ba2774b25b9010f2971d1309e145")
-TWILIO_NUMBER = os.environ.get("+18777804236")
-
-client = Client(ACCOUNT_SID, AUTH_TOKEN)
-
-# ---------- DB ----------
+# ---------- DATABASE ----------
 def get_db():
     return sqlite3.connect(DB_NAME)
 
@@ -69,24 +60,32 @@ def dashboard():
 @app.route("/register", methods=["POST"])
 def register():
     data = request.json
+
     conn = get_db()
     c = conn.cursor()
 
-    c.execute("INSERT INTO users (email, password) VALUES (?, ?)",
-              (data["email"], data["password"]))
+    c.execute(
+        "INSERT INTO users (email, password) VALUES (?, ?)",
+        (data["email"], data["password"])
+    )
 
     conn.commit()
     conn.close()
+
     return jsonify({"message": "Registered successfully"})
+
 
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
+
     conn = get_db()
     c = conn.cursor()
 
-    c.execute("SELECT * FROM users WHERE email=? AND password=?",
-              (data["email"], data["password"]))
+    c.execute(
+        "SELECT * FROM users WHERE email=? AND password=?",
+        (data["email"], data["password"])
+    )
 
     user = c.fetchone()
     conn.close()
@@ -98,37 +97,42 @@ def login():
 def add_contact():
     data = request.json
 
-    user = data["user"].strip()  # 🔥 FIX
+    user = data["user"].strip()
 
     conn = get_db()
     c = conn.cursor()
 
-    c.execute("""
-        INSERT INTO contacts (user, name, phone)
-        VALUES (?, ?, ?)
-    """, (user, data["name"], data["phone"]))
+    c.execute(
+        "INSERT INTO contacts (user, name, phone) VALUES (?, ?, ?)",
+        (user, data["name"], data["phone"])
+    )
 
     conn.commit()
     conn.close()
 
-    print("CONTACT SAVED FOR:", user)
-    print("ADDING TO POSTGRES:", user)# DEBUG
-
     return jsonify({"message": "Contact added"})
+
 
 @app.route("/get_contacts/<user>")
 def get_contacts(user):
+    user = user.strip()
+
     conn = get_db()
     c = conn.cursor()
 
-    c.execute("SELECT name, phone FROM contacts WHERE user=?", (user,))
+    c.execute(
+        "SELECT name, phone FROM contacts WHERE user=?",
+        (user,)
+    )
+
     rows = c.fetchall()
     conn.close()
 
     contacts = [{"name": r[0], "phone": r[1]} for r in rows]
+
     return jsonify(contacts)
 
-# -------- SOS --------
+# -------- SOS (NO TWILIO, ONLY DATA RETURN) --------
 @app.route("/sos", methods=["POST"])
 def sos():
     data = request.json
@@ -142,15 +146,16 @@ def sos():
 
     # Save SOS
     c.execute(
-        "INSERT INTO sos_alerts (user_email, latitude, longitude) VALUES (%s, %s, %s)",
+        "INSERT INTO sos_alerts (user, latitude, longitude) VALUES (?, ?, ?)",
         (user, lat, lon)
     )
 
     # Get contacts
     c.execute(
-        "SELECT name, phone FROM contacts WHERE user_email=%s",
+        "SELECT name, phone FROM contacts WHERE user=?",
         (user,)
     )
+
     contacts = c.fetchall()
 
     conn.commit()
@@ -161,6 +166,7 @@ def sos():
         "latitude": lat,
         "longitude": lon
     })
-# -------- RUN --------
+
+# ---------- RUN ----------
 if __name__ == "__main__":
     app.run(debug=True)
