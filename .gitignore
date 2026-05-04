@@ -1,4 +1,4 @@
+database.db
 __pycache__/
 *.pyc
-sos_app.db
 .env
