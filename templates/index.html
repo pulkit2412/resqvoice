@@ -7,9 +7,9 @@
 <body>
 
 <div class="container">
-  <h1>Hi, <span id="userName"></span> 👋</h1>
+  <h2>Dashboard</h2>
 
-  <button class="sos-btn" onclick="sendSOS()">🚨 SOS NOW</button>
+  <button onclick="sendSOS()">🚨 SOS</button>
 
   <h3>Add Contact</h3>
   <input id="name" placeholder="Name">
@@ -21,17 +21,6 @@
 </div>
 
 <script src="/static/script.js"></script>
-
-<script>
-const user = localStorage.getItem("user");
-
-if (!user) {
-  window.location.href = "/";
-} else {
-  document.getElementById("userName").innerText = user;
-  loadContacts();
-}
-</script>
 
 </body>
 </html>
