@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>Login - resQvoice</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -9,13 +9,14 @@
 <div class="container">
   <h1>resQvoice</h1>
 
-  <input id="email" placeholder="Email">
-  <input id="password" placeholder="Password" type="password">
+  <input id="email" type="email" placeholder="Email" required>
+  <input id="password" type="password" placeholder="Password" required>
 
   <button onclick="register()">Register</button>
   <button onclick="login()">Login</button>
 </div>
 
+<!-- IMPORTANT: JS MUST BE AT BOTTOM -->
 <script src="/static/auth.js"></script>
 
 </body>
