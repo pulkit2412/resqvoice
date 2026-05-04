@@ -1,64 +1,30 @@
-// -------- REGISTER --------
-async function register() {
-  try {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+function register() {
+  fetch('/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value,
+      otp: document.getElementById('otp').value
+    })
+  })
+  .then(res => res.json())
+  .then(data => alert(data.message));
+}
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-    if (!email || !password) {
-      alert("Please fill all fields");
-      return;
-    }
+  const user = JSON.parse(localStorage.getItem("user"));
 
-    const res = await fetch("/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-    alert(data.message);
-
-  } catch (err) {
-    console.error("Register Error:", err);
-    alert("Something went wrong in register");
+  if (user && user.email === email && user.password === password) {
+    alert("Login successful!");
+    window.location.href = "index.html";
+  } else {
+    alert("Invalid credentials");
   }
 }
 
-
-// -------- LOGIN --------
-async function login() {
-  try {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    if (!email || !password) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    const res = await fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      localStorage.setItem("user", email);
-      window.location.href = "/dashboard";
-    } else {
-      alert("Invalid credentials");
-    }
-
-  } catch (err) {
-    console.error("Login Error:", err);
-    alert("Something went wrong in login");
-  }
-}
-
-
-// -------- SKIP --------
 function skip() {
-  window.location.href = "/dashboard";
+  window.location.href = "index.html";
 }
